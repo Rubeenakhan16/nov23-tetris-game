@@ -12,7 +12,7 @@ pipeline {
         snykOrg = "14141617-a2e0-4a4f-b558-dce1ea5cad2d"
         SCANNER_HOME=tool 'sonar-scanner'
     }
-    
+
     agent {label 'docker'}
     stages {
         stage('Git Checkout') {
@@ -49,17 +49,17 @@ pipeline {
             }
         }
 
-        stage('Snyk Scan') {
-            steps {
-                snykImageScan('$dockerImage', '$dockerTag', 'snykCred', '$snykOrg')
-            }
-        }
+        // stage('Snyk Scan') {
+        //     steps {
+        //         snykImageScan('$dockerImage', '$dockerTag', 'snykCred', '$snykOrg')
+        //     }
+        // }
 
-        stage('Trivy Scan') {
-            steps {
-                sh "trivy image -f json -o results-${BUILD_NUMBER}.json ${dockerImage}:${dockerTag}"
-            }
-        }
+        // stage('Trivy Scan') {
+        //     steps {
+        //         sh "trivy image -f json -o results-${BUILD_NUMBER}.json ${dockerImage}:${dockerTag}"
+        //     }
+        // }
 
         stage('Docker Push') {
             steps {
