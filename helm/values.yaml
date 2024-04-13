@@ -1,5 +1,5 @@
 deployment:
-  name: devops-project-tetris
+  name: nov23-tetris-game
   replicaCount: 1
 image:
   account: 227219889473.dkr.ecr.ap-south-1.amazonaws.com
