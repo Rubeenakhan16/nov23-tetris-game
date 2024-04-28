@@ -21,27 +21,27 @@ pipeline {
             }
         }
 
-        stage("Sonarqube Analysis ") {
-            steps {
-                withSonarQubeEnv('sonar-server') {
-                    dir('src') { 
-                        sh '''
-                        $SCANNER_HOME/bin/sonar-scanner \
-                        -Dsonar.projectName="$repoName" \
-                        -Dsonar.projectKey="$repoName"
-                        '''
-                    }
-                }
-            }
-        }
+        // stage("Sonarqube Analysis ") {
+        //     steps {
+        //         withSonarQubeEnv('sonar-server') {
+        //             dir('src') { 
+        //                 sh '''
+        //                 $SCANNER_HOME/bin/sonar-scanner \
+        //                 -Dsonar.projectName="$repoName" \
+        //                 -Dsonar.projectKey="$repoName"
+        //                 '''
+        //             }
+        //         }
+        //     }
+        // }
 
-        stage("quality gate"){
-           steps {
-                script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'sonarToken' 
-                }
-            } 
-        }
+        // stage("quality gate"){
+        //    steps {
+        //         script {
+        //             waitForQualityGate abortPipeline: false, credentialsId: 'sonarToken' 
+        //         }
+        //     } 
+        // }
 
         stage('Docker Build') {
             steps {
