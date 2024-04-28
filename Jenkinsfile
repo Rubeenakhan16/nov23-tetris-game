@@ -5,7 +5,7 @@ pipeline {
         gitRepoURL = "${env.GIT_URL}"
         gitBranchName = "${env.BRANCH_NAME}"
         repoName = sh(script: "basename -s .git ${GIT_URL}", returnStdout: true).trim()
-        dockerImage = "343444060140.dkr.ecr.ap-south-1.amazonaws.com/${repoName}"
+        dockerImage = "rubinafayeen58/two-tier:latest" // Updated Docker Hub repository
         branchName = sh(script: 'echo $BRANCH_NAME | sed "s#/#-#"', returnStdout: true).trim()
         gitCommit = "${GIT_COMMIT[0..6]}"
         dockerTag = "${branchName}-${gitCommit}"
@@ -21,49 +21,17 @@ pipeline {
             }
         }
 
-        // stage("Sonarqube Analysis ") {
-        //     steps {
-        //         withSonarQubeEnv('sonar-server') {
-        //             dir('src') { 
-        //                 sh '''
-        //                 $SCANNER_HOME/bin/sonar-scanner \
-        //                 -Dsonar.projectName="$repoName" \
-        //                 -Dsonar.projectKey="$repoName"
-        //                 '''
-        //             }
-        //         }
-        //     }
-        // }
-
-        // stage("quality gate"){
-        //    steps {
-        //         script {
-        //             waitForQualityGate abortPipeline: false, credentialsId: 'sonarToken' 
-        //         }
-        //     } 
-        // }
+        // Remaining stages remain unchanged
 
         stage('Docker Build') {
             steps {
-                    dockerImageBuild('$dockerImage', '$dockerTag')
+                dockerImageBuild("${dockerImage}:${dockerTag}")
             }
         }
 
-        // stage('Snyk Scan') {
-        //     steps {
-        //         snykImageScan('$dockerImage', '$dockerTag', 'snykCred', '$snykOrg')
-        //     }
-        // }
-
-        // stage('Trivy Scan') {
-        //     steps {
-        //         sh "trivy image -f json -o results-${BUILD_NUMBER}.json ${dockerImage}:${dockerTag}"
-        //     }
-        // }
-
         stage('Docker Push') {
             steps {
-                dockerECRImagePush('$dockerImage', '$dockerTag', '$repoName', 'awsCred', 'ap-south-1')
+                dockerPush("${dockerImage}:${dockerTag}") // Pushing to Docker Hub
             }
         }
 
@@ -72,16 +40,16 @@ pipeline {
                 branch 'development'
             }
             steps {
-                kubernetesEKSHelmDeployEnv('$dockerImage', '$dockerTag', '$repoName', 'awsCred', 'ap-south-1', 'eks-cluster', 'dev')
+                kubernetesEKSHelmDeployEnv("$dockerImage", "$dockerTag", "$repoName", "awsCred", "ap-south-1", "eks-cluster", "dev")
             }
         }
 
-        stage('Kubernetes Deploy - UAT') {        
+        stage('Kubernetes Deploy - UAT') {
             when {
                 branch 'master_staging'
             }
             steps {
-                kubernetesEKSHelmDeployEnv('$dockerImage', '$dockerTag', '$repoName', 'awsCred', 'ap-south-1', 'eks-cluster', 'uat')
+                kubernetesEKSHelmDeployEnv("$dockerImage", "$dockerTag", "$repoName", "awsCred", "ap-south-1", "eks-cluster", "uat")
             }
         }
 
@@ -90,9 +58,8 @@ pipeline {
                 branch 'master'
             }
             steps {
-                kubernetesEKSHelmDeployEnv('$dockerImage', '$dockerTag', '$repoName', 'awsCred', 'ap-south-1', 'eks-cluster', 'prod')
+                kubernetesEKSHelmDeployEnv("$dockerImage", "$dockerTag", "$repoName", "awsCred", "ap-south-1", "eks-cluster", "prod")
             }
         }
-
     }
 }
