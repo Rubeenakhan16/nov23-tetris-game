@@ -11,6 +11,7 @@ pipeline {
         dockerTag = "${branchName}-${gitCommit}"
         snykOrg = "42babfb3-cd5a-488b-b2da-d7af6ac6d426"
         SCANNER_HOME=tool 'sonar-scanner'
+        dockerHubCred = 'docker' // Docker Hub credential ID
     }
 
     agent {label 'docker'}
@@ -31,7 +32,13 @@ pipeline {
 
         stage('Docker Push') {
             steps {
-                dockerPush("${dockerImage}:${dockerTag}") // Pushing to Docker Hub
+                withCredentials([usernamePassword(credentialsId: dockerHubCred, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    script {
+                        docker.withRegistry('https://index.docker.io/v1/', DOCKER_USERNAME, DOCKER_PASSWORD) {
+                            dockerPush("${dockerImage}:${dockerTag}") // Pushing to Docker Hub
+                        }
+                    }
+                }
             }
         }
 
@@ -63,3 +70,4 @@ pipeline {
         }
     }
 }
+
