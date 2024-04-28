@@ -17,7 +17,7 @@ pipeline {
     stages {
         stage('Git Checkout') {
             steps {
-                gitCheckout("$gitRepoURL", "refs/heads/$gitBranchName", 'githubCred')
+                git 'https://github.com/Rubeenakhan16/nov23-tetris-game.git'
             }
         }
 
