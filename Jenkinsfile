@@ -9,7 +9,7 @@ pipeline {
         branchName = sh(script: 'echo $BRANCH_NAME | sed "s#/#-#"', returnStdout: true).trim()
         gitCommit = "${GIT_COMMIT[0..6]}"
         dockerTag = "${branchName}-${gitCommit}"
-        snykOrg = "14141617-a2e0-4a4f-b558-dce1ea5cad2d"
+        snykOrg = "42babfb3-cd5a-488b-b2da-d7af6ac6d426"
         SCANNER_HOME=tool 'sonar-scanner'
     }
 
