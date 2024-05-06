@@ -1,30 +1,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.deployment.name }}
-  namespace: {{ .Values.namespace }}
+  name: nov23-tetris-game
+  namespace: dev
 spec:
-  replicas: {{ .Values.deployment.replicaCount }}
+  replicas: 1
   selector:
     matchLabels:
-      app: {{ .Values.deployment.name }}
+      app: nov23-tetris-game
   template:
     metadata:
       labels:
-        app: {{ .Values.deployment.name }}
+        app: nov23-tetris-game
     spec:
       containers:
-      - image: {{ .Values.image.account }}/{{ .Values.deployment.name }}:{{ .Values.image.tag }}
-        name: {{ .Values.deployment.name }}
+      - name: nov23-tetris-game
+        image: rubinafayeen58/two-tier:latest
         ports:
-        - containerPort: {{ .Values.image.containerPort }}
-        resources:
-          limits:
-            cpu: {{ .Values.resource.cpu.limit | quote }}
-            memory: {{ .Values.resource.memory.limit | quote }}
-          requests:
-            cpu: {{ .Values.resource.cpu.requests | quote }}
-            memory: {{ .Values.resource.memory.requests | quote }}
-        env:
-        - name: ENV
-          value: {{ .Values.environment.env }}
+        - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nov23-tetris-game-svc
+  namespace: dev
+spec:
+  type: NodePort
+  ports:
+  - port: 3000
+    targetPort: 3000
+    nodePort: 30000 # You can choose any available port in the range 30000-32767
+  selector:
+    app: nov23-tetris-game
